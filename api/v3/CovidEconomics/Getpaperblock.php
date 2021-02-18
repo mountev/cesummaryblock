@@ -65,7 +65,13 @@ function civicrm_api3_covid_economics_Getpaperblock(array $params) {
   $dao = CRM_Core_DAO::executeQuery($sql, [1 => [$params['contact_id'], 'Integer']]);
   $dao->fetch();
   $returnValues = $dao->toArray();
-
+  if ($returnValues['civicrm_case_civicrm_relationship__civicrm_value_cep_paper_s']) {
+    $fileId = $returnValues['civicrm_case_civicrm_relationship__civicrm_value_cep_paper_s'];
+    $entityId = $returnValues['civicrm_case_civicrm_relationship__civicrm_value_cep_paper_s_1'];
+    $fileHash = CRM_Core_BAO_File::generateFileHash($entityId, $fileId);
+    $paperUrl = CRM_Utils_System::url('civicrm/file',"reset=1&id={$fileId}&eid={$entityId}&fcs={$fileHash}", TRUE);
+    $returnValues['paper_url'] = $paperUrl;
+  }
   // ALTERNATIVE: $returnValues = []; // OK, success
   // ALTERNATIVE: $returnValues = ["Some value"]; // OK, return a single value
 

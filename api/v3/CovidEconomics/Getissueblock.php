@@ -59,9 +59,18 @@ function civicrm_api3_covid_economics_Getissueblock($params) {
 //      AND civicrm_relationship.contact_id_a = %1
 //  $sql = "select * from civicrm_contact where id = %1";
   $dao = CRM_Core_DAO::executeQuery($sql, [1 => [$params['contact_id'], 'Integer']]);
-  $dao->fetch();
-  $returnValues = $dao->toArray();
-
+  $returnValues = [];
+  while ($dao->fetch()) {
+    $result = $dao->toArray();
+    if ($result['civicrm_case_civicrm_relationship__civicrm_value_cep_paper_s']) {
+      $fileId = $result['civicrm_case_civicrm_relationship__civicrm_value_cep_paper_s'];
+      $entityId = $result['civicrm_case_civicrm_relationship__civicrm_value_cep_paper_s_1'];
+      $fileHash = CRM_Core_BAO_File::generateFileHash($entityId, $fileId);
+      $paperUrl = CRM_Utils_System::url('civicrm/file',"reset=1&id={$fileId}&eid={$entityId}&fcs={$fileHash}", TRUE);
+      $result['paper_url'] = $paperUrl;
+    }
+    $returnValues[] = $result;
+  }
   // Spec: civicrm_api3_create_success($values = 1, $params = [], $entity = NULL, $action = NULL)
   return civicrm_api3_create_success($returnValues, $params, 'CovidEconomics', 'Getissueblock');
 }

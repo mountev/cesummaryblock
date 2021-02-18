@@ -51,7 +51,7 @@ function civicrm_api3_covid_economics_Getissueblock($params) {
     WHERE (( (civicrm_relationship.is_active <> '0') AND (civicrm_relationship.relationship_type_id = '25')
       AND (civicrm_case_civicrm_relationship__civicrm_value_cep_paper_sub_36.paper_191 IS NOT NULL )
       AND (civicrm_activity_civicrm_case_activity.subject LIKE '%to Accepted - Await Publication%')
-        ))
+      AND (civicrm_relationship.contact_id_b = %1) ))
     GROUP BY civicrm_case_civicrm_relationship_start_date, civicrm_activity_civicrm_case_activity_activity_date_time,
       civicrm_contact_civicrm_relationship__civicrm_value_submissi, civicrm_contact_civicrm_relationship__civicrm_value_submissi_1,
       civicrm_case_civicrm_relationship__civicrm_value_cep_paper_s, civicrm_case_civicrm_relationship__civicrm_value_cep_paper_s_1

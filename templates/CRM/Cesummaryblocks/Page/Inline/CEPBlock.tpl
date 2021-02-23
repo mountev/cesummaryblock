@@ -18,13 +18,17 @@
 </div>
 <div class="crm-summary-row">
   <div class="crm-label">{ts}Author:{/ts}</div>
-  <div class="crm-content">{$info.civicrm_contact_civicrm_relationship_1_display_name}</div>
+  <div class="crm-content">{$info.civicrm_contact_civicrm_relationship_1_display_name} {if $info.civicrm_contact_civicrm_relationship_1c_display_name}(Connected to: {$info.civicrm_contact_civicrm_relationship_1c_display_name}){/if}</div>
 </div>
 <div class="crm-summary-row">
   <div class="crm-label">{ts}Paper:{/ts}</div>
-  <div class="crm-content"><a href="{$info.paper_url}">{$info.paper_url}</a></div>
+  <div class="crm-content"><a href="{$info.paper_url}">{$info.paper_name}</a></div>
 </div>
 <div class="crm-summary-row">
   <div class="crm-label">{ts}Co-Author:{/ts}</div>
   <div class="crm-content">{$info.civicrm_contact_civicrm_relationship_2_display_name}</div>
+</div>
+<div class="crm-summary-row">
+  <div class="crm-label">{ts}Published In:{/ts}</div>
+  <div class="crm-content">{$info.civicrm_contact_civicrm_relationship_3_display_name}</div>
 </div>

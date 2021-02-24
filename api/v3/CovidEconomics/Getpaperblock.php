@@ -1,6 +1,9 @@
 <?php
 use CRM_Cesummaryblocks_ExtensionUtil as E;
 
+const REL_TYPE_COAUTHOR = 24;
+const REL_TYPE_PUBLISHED_IN = 25;
+
 /**
  * CovidEconomics.Getpaperblock API specification (optional)
  * This is used for documentation and validation.
@@ -21,7 +24,7 @@ function _civicrm_api3_covid_economics_Getpaperblock_spec(&$spec) {
  * @return array
  *   API result descriptor
  *
- * @throws \CiviCRM_API3_Exception
+ * @throws \CiviCRM_API3_Exception|\CRM_Core_Exception
  * @see civicrm_api3_create_success
  */
 function civicrm_api3_covid_economics_Getpaperblock(array $params) {
@@ -36,6 +39,7 @@ function civicrm_api3_covid_economics_Getpaperblock(array $params) {
       civicrm_contact_civicrm_relationship.employer_id AS civicrm_contact_civicrm_relationship_employer_id,
       civicrm_contact_civicrm_relationship_1.display_name AS civicrm_contact_civicrm_relationship_1_display_name,
       civicrm_contact_civicrm_relationship_1.id AS civicrm_contact_civicrm_relationship_1_id,
+      civicrm_contact_civicrm_relationship_1c.id AS civicrm_contact_civicrm_relationship_1c_id,
       civicrm_case_civicrm_relationship__civicrm_value_cep_paper_sub_36.paper_191 AS civicrm_case_civicrm_relationship__civicrm_value_cep_paper_s,
       civicrm_case_civicrm_relationship__civicrm_value_cep_paper_sub_36.entity_id AS civicrm_case_civicrm_relationship__civicrm_value_cep_paper_s_1,
       GROUP_CONCAT(DISTINCT civicrm_contact_civicrm_relationship_2.display_name SEPARATOR '<br/> ') AS civicrm_contact_civicrm_relationship_2_display_name,
@@ -80,30 +84,62 @@ function civicrm_api3_covid_economics_Getpaperblock(array $params) {
     $returnValues['paper_url'] = $paperUrl;
     $returnValues['paper_name'] = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File', $fileId, 'uri');
   }
-  if (!empty($returnValues['civicrm_contact_civicrm_relationship_2_display_name'])) {
-    $result = civicrm_api3('Relationship', 'get', [
-      'sequential' => 1,
-      'return' => ["contact_id_b", "contact_id_b.display_name"],
-      'contact_id_a' => $params['contact_id'],
-      'relationship_type_id' => 24,//co-author
-      'is_active' => 1,
-    ]);
-    if (!empty($result['values'])) {
-      $coAuths = [];
-      foreach ($result['values'] as $coa) {
-        $url = CRM_Utils_System::url("civicrm/contact/view", "reset=1&cid={$coa['contact_id_b']}");
-        $coAuths[$coa['contact_id_b']] = "<a href='{$url}'>{$coa['contact_id_b.display_name']}</a>";
-      }
-      if (!empty($coAuths)) {
-        $returnValues['civicrm_contact_civicrm_relationship_2_display_name'] = implode('<br/>', $coAuths);
-      }
-    }
+
+  $relations = _civicrm_api3_covid_economics_getRelatedMembersWithUrl($params);
+  if (!empty($relations[REL_TYPE_COAUTHOR])) {
+    $returnValues['civicrm_contact_civicrm_relationship_2_display_name'] = $relations[REL_TYPE_COAUTHOR];
+  }
+  if (!empty($relations[REL_TYPE_PUBLISHED_IN])) {
+    $returnValues['civicrm_contact_civicrm_relationship_3_display_name'] = $relations[REL_TYPE_PUBLISHED_IN];
   }
   if (!empty($returnValues['civicrm_contact_civicrm_relationship_1_display_name'])) {
     $url = CRM_Utils_System::url("civicrm/contact/view", "reset=1&cid={$returnValues['civicrm_contact_civicrm_relationship_1_id']}");
     $returnValues['civicrm_contact_civicrm_relationship_1_display_name'] = "<a href='{$url}'>{$returnValues['civicrm_contact_civicrm_relationship_1_display_name']}</a>";
+
+    $result = civicrm_api3('EntityTag', 'get', [
+      'sequential' => 1,
+      'entity_table' => "civicrm_contact",
+      'entity_id' => $returnValues['civicrm_contact_civicrm_relationship_1_id'],
+      'tag_id' => "CEPR Researcher",
+    ]);
+    if (!empty($result['id'])) {
+      $returnValues['civicrm_contact_civicrm_relationship_1_tag'] = ts('CEPR Researcher');
+    }
+  }
+  if (!empty($returnValues['civicrm_contact_civicrm_relationship_1c_display_name'])) {
+    $url = CRM_Utils_System::url("civicrm/contact/view", "reset=1&cid={$returnValues['civicrm_contact_civicrm_relationship_1c_id']}");
+    $returnValues['civicrm_contact_civicrm_relationship_1c_display_name'] = "<a href='{$url}'>{$returnValues['civicrm_contact_civicrm_relationship_1c_display_name']}</a>";
   }
 
   // Spec: civicrm_api3_create_success($values = 1, $params = [], $entity = NULL, $action = NULL)
   return civicrm_api3_create_success($returnValues, $params, 'CovidEconomics', 'Getpaperblock');
+}
+
+/**
+ * @param array $params
+ *
+ * @return array
+ * @throws \CiviCRM_API3_Exception
+ */
+function _civicrm_api3_covid_economics_getRelatedMembersWithUrl(array $params): array {
+  $result = civicrm_api3('Relationship', 'get', [
+    'sequential' => 1,
+    'return' => ["contact_id_b", "contact_id_b.display_name", "relationship_type_id"],
+    'contact_id_a' => $params['contact_id'],
+    'relationship_type_id' => ["IN" => [REL_TYPE_COAUTHOR, REL_TYPE_PUBLISHED_IN]],
+    'is_active' => 1,
+  ]);
+  $relations = [];
+  if (!empty($result['values'])) {
+    foreach ($result['values'] as $rel) {
+      $url = CRM_Utils_System::url("civicrm/contact/view", "reset=1&cid={$rel['contact_id_b']}");
+      $relations[$rel['relationship_type_id']][$rel['contact_id_b']] = "<a href='{$url}'>{$rel['contact_id_b.display_name']}</a>";
+    }
+    if (!empty($relations)) {
+      foreach ($relations as $typeId => $rel) {
+        $relations[$typeId] = implode('<br/>', $rel);
+      }
+    }
+  }
+  return $relations;
 }

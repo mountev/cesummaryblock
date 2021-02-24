@@ -18,7 +18,7 @@
 </div>
 <div class="crm-summary-row">
   <div class="crm-label">{ts}Author:{/ts}</div>
-  <div class="crm-content">{$info.civicrm_contact_civicrm_relationship_1_display_name} {if $info.civicrm_contact_civicrm_relationship_1_tag}{$info.civicrm_contact_civicrm_relationship_1_tag}, &nbsp;{/if}{if $info.civicrm_contact_civicrm_relationship_1c_display_name}Connected to: {$info.civicrm_contact_civicrm_relationship_1c_display_name}{/if}</div>
+  <div class="crm-content">{$info.civicrm_contact_civicrm_relationship_1_display_name} &nbsp;&nbsp;&nbsp;{if $info.civicrm_contact_civicrm_relationship_1_tag}{$info.civicrm_contact_civicrm_relationship_1_tag}, &nbsp;{/if}{if $info.civicrm_contact_civicrm_relationship_1c_display_name}Connected to: {$info.civicrm_contact_civicrm_relationship_1c_display_name}{/if}</div>
 </div>
 <div class="crm-summary-row">
   <div class="crm-label">{ts}Paper:{/ts}</div>

@@ -31,6 +31,7 @@ function civicrm_api3_covid_economics_Getissueblock($params) {
       civicrm_activity_civicrm_case_activity.activity_date_time AS civicrm_activity_civicrm_case_activity_activity_date_time,
       civicrm_contact_civicrm_relationship__civicrm_value_submission_de_35.for_accepted_ublications_what_or_200 AS civicrm_contact_civicrm_relationship__civicrm_value_submissi,
       civicrm_contact_civicrm_relationship__civicrm_value_submission_de_35.short_title_194 AS civicrm_contact_civicrm_relationship__civicrm_value_submissi_1,
+      civicrm_contact_civicrm_relationship__civicrm_value_submission_de_35.full_title_187 AS civicrm_contact_civicrm_relationship__civicrm_value_submissi_ft,
       civicrm_case_civicrm_relationship__civicrm_value_cep_paper_sub_36.paper_191 AS civicrm_case_civicrm_relationship__civicrm_value_cep_paper_s,
       civicrm_case_civicrm_relationship__civicrm_value_cep_paper_sub_36.entity_id AS civicrm_case_civicrm_relationship__civicrm_value_cep_paper_s_1
     FROM
@@ -66,6 +67,7 @@ function civicrm_api3_covid_economics_Getissueblock($params) {
       $fileHash = CRM_Core_BAO_File::generateFileHash($entityId, $fileId);
       $paperUrl = CRM_Utils_System::url('civicrm/file',"reset=1&id={$fileId}&eid={$entityId}&fcs={$fileHash}", TRUE);
       $result['paper_url'] = $paperUrl;
+      $result['paper_name'] = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File', $fileId, 'uri');
     }
     $returnValues[] = $result;
   }

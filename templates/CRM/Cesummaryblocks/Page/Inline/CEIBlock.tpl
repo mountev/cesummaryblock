@@ -2,7 +2,7 @@
 {foreach from=$result.values item=info}
   <div class="crm-summary-row">
     <div class="crm-label">{ts}Long title:{/ts}</div>
-    <div class="crm-content">{$info.civicrm_contact_civicrm_relationship__civicrm_value_submissi_ft}</div>
+    <div class="crm-content">{$info.civicrm_contact_civicrm_relationship_display_name}</div>
   </div>
   <div class="crm-summary-row">
     <div class="crm-label">{ts}Short title:{/ts}</div>
